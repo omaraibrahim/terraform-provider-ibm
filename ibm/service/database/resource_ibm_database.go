@@ -423,6 +423,8 @@ func ResourceIBMDatabaseInstance() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{
+					"allowlist"},
 				Deprecated: "This field is deprecated please use allowlist",
 			},
 			"allowlist": {
@@ -444,6 +446,8 @@ func ResourceIBMDatabaseInstance() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{
+					"whitelist"},
 			},
 			"groups": {
 				Type:     schema.TypeList,
