@@ -61,7 +61,7 @@ func TestAccIBMDatabaseInstance_Postgres_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "members_disk_allocation_mb", "10240"),
 					resource.TestCheckResourceAttr(name, "members_cpu_allocation_count", "0"),
 					resource.TestCheckResourceAttr(name, "service_endpoints", "public"),
-					resource.TestCheckResourceAttr(name, "whitelist.#", "1"),
+					resource.TestCheckResourceAttr(name, "whitelist.#", "0"),
 					resource.TestCheckResourceAttr(name, "allowlist.#", "1"),
 					resource.TestCheckResourceAttr(name, "users.#", "1"),
 					resource.TestCheckResourceAttr(name, "connectionstrings.#", "2"),
@@ -82,7 +82,7 @@ func TestAccIBMDatabaseInstance_Postgres_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "members_memory_allocation_mb", "4096"),
 					resource.TestCheckResourceAttr(name, "members_disk_allocation_mb", "14336"),
 					resource.TestCheckResourceAttr(name, "service_endpoints", "public-and-private"),
-					resource.TestCheckResourceAttr(name, "whitelist.#", "2"),
+					resource.TestCheckResourceAttr(name, "whitelist.#", "0"),
 					resource.TestCheckResourceAttr(name, "allowlist.#", "2"),
 					resource.TestCheckResourceAttr(name, "users.#", "2"),
 					resource.TestCheckResourceAttr(name, "connectionstrings.#", "3"),
@@ -148,7 +148,6 @@ func TestAccIBMDatabaseInstance_Postgres_Node(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "node_disk_allocation_mb", "5120"),
 					resource.TestCheckResourceAttr(name, "node_cpu_allocation_count", "3"),
 					resource.TestCheckResourceAttr(name, "service_endpoints", "public"),
-					resource.TestCheckResourceAttr(name, "whitelist.#", "1"),
 					resource.TestCheckResourceAttr(name, "allowlist.#", "1"),
 					resource.TestCheckResourceAttr(name, "users.#", "1"),
 					resource.TestCheckResourceAttr(name, "connectionstrings.#", "2"),
@@ -171,7 +170,7 @@ func TestAccIBMDatabaseInstance_Postgres_Node(t *testing.T) {
 					resource.TestCheckResourceAttr(name, "node_disk_allocation_mb", "7168"),
 					resource.TestCheckResourceAttr(name, "node_cpu_allocation_count", "3"),
 					resource.TestCheckResourceAttr(name, "service_endpoints", "public-and-private"),
-					resource.TestCheckResourceAttr(name, "whitelist.#", "2"),
+					resource.TestCheckResourceAttr(name, "whitelist.#", "0"),
 					resource.TestCheckResourceAttr(name, "allowlist.#", "2"),
 					resource.TestCheckResourceAttr(name, "users.#", "2"),
 					resource.TestCheckResourceAttr(name, "connectionstrings.#", "3"),
@@ -410,10 +409,6 @@ func testAccCheckIBMDatabaseInstancePostgresBasic(databaseResourceGroup string, 
 		  name     = "user123"
 		  password = "password12"
 		}
-		whitelist {
-		  address     = "172.168.1.2/32"
-		  description = "desc1"
-		}
 		allowlist {
 		  address     = "172.168.1.2/32"
 		  description = "desc1"
@@ -447,14 +442,6 @@ func testAccCheckIBMDatabaseInstancePostgresFullyspecified(databaseResourceGroup
 		users {
 		  name     = "user124"
 		  password = "password12"
-		}
-		whitelist {
-		  address     = "172.168.1.2/32"
-		  description = "desc1"
-		}
-		whitelist {
-		  address     = "172.168.1.1/32"
-		  description = "desc"
 		}
 		allowlist {
 		  address     = "172.168.1.2/32"
@@ -511,10 +498,6 @@ func testAccCheckIBMDatabaseInstancePostgresNodeBasic(databaseResourceGroup stri
 		  name     = "user123"
 		  password = "password12"
 		}
-		whitelist {
-		  address     = "172.168.1.2/32"
-		  description = "desc1"
-		}
 		allowlist {
 		  address     = "172.168.1.2/32"
 		  description = "desc1"
@@ -549,14 +532,6 @@ func testAccCheckIBMDatabaseInstancePostgresNodeFullyspecified(databaseResourceG
 		users {
 		  name     = "user124"
 		  password = "password12"
-		}
-		whitelist {
-		  address     = "172.168.1.2/32"
-		  description = "desc1"
-		}
-		whitelist {
-		  address     = "172.168.1.1/32"
-		  description = "desc"
 		}
 		allowlist {
 		  address     = "172.168.1.2/32"
