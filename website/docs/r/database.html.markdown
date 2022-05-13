@@ -37,6 +37,7 @@ resource "ibm_database" "<your_database>" {
   users {
     name     = "user123"
     password = "password12"
+    type     = "database"
   }
   whitelist {
     address     = "172.168.1.1/32"
@@ -71,8 +72,9 @@ resource "ibm_database" "<your_database>" {
   node_memory_allocation_mb = 1024
   node_disk_allocation_mb   = 20480
   users {
-    name     = "user123"
-    password = "password12"
+    name      = "user123"
+    password  = "password12"
+    type      = "database"
   }
   whitelist {
     address     = "172.168.1.1/32"
@@ -198,8 +200,8 @@ resource "ibm_database" "autoscale" {
     }
 }
 ```
-### Sample cassandra database instance
-Cassandra takes more time than expected. It is always advisible to extend timeouts using timeouts block
+### Sample Cassandra database instance
+* Cassandra provisioning may require more time than the default timeout. A longer timeout value can be set with using the `timeouts` attribute.
 
 ```terraform
 data "ibm_resource_group" "test_acc" {
@@ -216,8 +218,9 @@ resource "ibm_database" "cassandra" {
   members_memory_allocation_mb = 36864
   members_disk_allocation_mb   = 61440
   users {
-    name     = "user123"
-    password = "password12"
+    name      = "user123"
+    password  = "password12"
+    type      = "database"
   }
   whitelist {
     address     = "172.168.1.2/32"
@@ -231,10 +234,10 @@ resource "ibm_database" "cassandra" {
   }
 }
 ```
-### Sample enterprise mongo database instance
-* Enterprise MongoDB takes more time than expected. It is always advisible to extend timeouts using timeouts block.
+### Sample MongoDB Enterprise database instance
+* MongoDB Enterprise provisioning may require more time than the default timeout. A longer timeout value can be set with using the `timeouts` attribute.
 * Please make sure your resources meet minimum requirements of scaling. Please refer [docs](https://cloud.ibm.com/docs/databases-for-mongodb?topic=databases-for-mongodb-pricing#scaling-per-member) for more info.
-* `serive_endpoints` cannot be updated on this instance.
+* `service_endpoints` cannot be updated on this instance.
 
 ```terraform
 data "ibm_resource_group" "test_acc" {
@@ -252,8 +255,15 @@ resource "ibm_database" "mongodb" {
   members_memory_allocation_mb = 43008
   tags                         = ["one:two"]
   users {
-    name     = "user123"
-    password = "password12"
+    name      = "dbuser"
+    password  = "password12"
+    type      = "database"
+  }
+  users {
+    name     = "opsmanageruser"
+    password = "$ecurepa$$word12"
+    type     = "ops_manager"
+    role     = "group_read_only"
   }
   whitelist {
     address     = "172.168.1.2/32"
@@ -266,6 +276,79 @@ resource "ibm_database" "mongodb" {
   }
 }
 ```
+
+### Sample MongoDB Enterprise database instance with BI Connector and Analytics
+* To enable Analytics and/or BI Connector for MongoDB Enterprise, a `group` attribute must be defined for the `analytics` and `bi_connector` group types with `members` scaled to at exactly `1`.
+* MongoDB Enterprise provisioning may require more time than the default timeout. A longer timeout value can be set with using the `timeouts` attribute.
+
+```terraform
+data "ibm_resource_group" "test_acc" {
+  is_default = true
+}
+
+resource "ibm_database" "mongodb_enterprise" {
+  resource_group_id = data.ibm_resource_group.test_acc.id
+  name              = "test"
+  service           = "databases-for-mongodb"
+  plan              = "enterprise"
+  location          = "us-south"
+  adminpassword     = "password12"
+  tags              = ["one:two"]
+
+  group {
+    group_id = "member"
+    
+    memory { 
+      allocation_mb = 14336
+    }
+    
+    disk { 
+      allocation_mb = 20480
+    }
+  }
+  
+  group {
+    group_id = "analytics"
+    
+    members { 
+      allocation_count = 1
+    }
+  }
+  
+  group {
+    group_id = "bi_connector"
+    
+    members { 
+      allocation_count = 1
+    }
+  }
+    
+  timeouts {
+    create = "120m"
+    update = "120m"
+    delete = "15m"
+  }
+}
+
+data "ibm_database_connection" "mongodb_conn" {
+  deployment_id = ibm_database.mongodb_enterprise.id
+  user_type     = "database"
+  user_id       = "admin"
+  endpoint_type = "public"
+}
+
+output "bi_connector_connection" {
+  description = "BI Connector connection string"
+  value       = data.ibm_database_connection.mongodb_conn.bi_connector.0.composed.0
+}
+
+output "analytics_connection" {
+  description = "Analytics Node connection string"
+  value       = data.ibm_database_connection.mongodb_conn.analytics.0.composed.0
+}
+
+```
+
 ### Sample EDB instance
 EDB takes more time than expected. It is always advisible to extend timeouts using timeouts block
 
@@ -285,8 +368,9 @@ resource "ibm_database" "edb" {
   members_disk_allocation_mb   = 61440
   tags                         = ["one:two"]
   users {
-    name     = "user123"
-    password = "password12"
+    name      = "user123"
+    password  = "password12"
+    type      = "database"
   }
   whitelist {
     address     = "172.168.1.2/32"
@@ -437,8 +521,11 @@ Review the argument reference that you can specify for your resource.
 - `users` - (Optional, List of Objects) A list of users that you want to create on the database. Multiple blocks are allowed.
 
   Nested scheme for `users`:
-  - `name` - (Optional, String) The user ID to add to the database instance. The user ID must be in the range 5 - 32 characters.
-  - `password` - (Optional, String) The password for the user ID. The password must be in the range 10 - 32 characters.
+  - `name` - (Required, String) The user name to add to the database instance. The user name must be in the range 5 - 32 characters.
+  - `password` - (Required, String) The password for the user. The password must be in the range 10 - 32 characters. Users 
+  - `type` - (Optional, String) The type for the user. Examples: `database`, `ops_manager`, `read_only_replica`. The default value is `database`.
+  - `role` - (Optional, String) The role for the user. Only available for `ops_manager` user type. Examples: `group_read_only`, `group_data_access_admin`.
+
 - `whitelist` - (Optional, List of Objects) A list of allowed IP addresses for the database. Multiple blocks are allowed.
 
   Nested scheme for `whitelist`:
